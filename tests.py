@@ -36,7 +36,7 @@ class TextTest(unittest.TestCase):
 class IntegerTest(unittest.TestCase):
     def test_init(self):
         self.assertEqual(IntegerField(10).value, 10)
-        self.assertEqual(IntegerField(10L).value, 10)
+        # self.assertEqual(IntegerField(10L).value, 10)
 
         self.assertRaises(ParseException, IntegerField.__init__, IntegerField(), '5')
         # with self.assertRaises(ParseException):
@@ -48,14 +48,14 @@ class IntegerTest(unittest.TestCase):
 
     def test_encode(self):
         self.assertEqual(IntegerField(10).json_encode(), '10')
-        self.assertEqual(IntegerField(10L).json_encode(), '10')
+        # self.assertEqual(IntegerField(10L).json_encode(), '10')
 
 
 class FloatTest(unittest.TestCase):
     def test_init(self):
         self.assertEqual(FloatField(10).value, float(10))
         self.assertEqual(FloatField(10.0).value, float(10))
-        self.assertEqual(FloatField(10L).value, float(10))
+        # self.assertEqual(FloatField(10L).value, float(10))
         self.assertEqual(FloatField(10.5).value, 10.5)
 
         self.assertRaises(ParseException, FloatField.__init__, FloatField(), '10')
@@ -64,7 +64,7 @@ class FloatTest(unittest.TestCase):
 
     def test_encode(self):
         self.assertEqual(FloatField(10.5).json_encode(), '10.5')
-        self.assertEqual(FloatField(10L).json_encode(), '10')
+        # self.assertEqual(FloatField(10L).json_encode(), '10')
 
 
 class NestedTest(unittest.TestCase):
