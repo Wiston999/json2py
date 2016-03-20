@@ -1,5 +1,4 @@
 import json
-from .encoder import BaseEncoder
 
 __author__ = 'Victor'
 
@@ -52,7 +51,7 @@ class FloatField(NumberField):
         super(NumberField, self).__init__(**kwargs)
         self.value = args[0] if len(args) > 0 else kwargs.get('value')
 
-        if not isinstance(self.value, float) and self.value is not None:
+        if not isinstance(self.value, (float, int, long)) and self.value is not None:
             raise ParseException('FloatField cannot parse non float')
 
 class NestedField(BaseField):
@@ -62,7 +61,7 @@ class NestedField(BaseField):
         super(NestedField, self).__init__(**kwargs)
 
         data = args[0] if len(args) > 0 else kwargs.get('value')
-        if not isinstance(self.value, dict) and self.value is not None:
+        if not isinstance(data, dict) and data is not None:
             raise ParseException('NestedField cannot parse non dict')
 
         if data is not None:
@@ -82,17 +81,18 @@ class NestedField(BaseField):
                 if key not in data:
                     raise LookupError('%s was not found on data dict' % key)
                 field = field.__class__(data[key], field.__class__)
-                setattr(self, reverseLookUp[key], field)
+                self.value[reverseLookUp[key]] = field
+                # setattr(self, reverseLookUp[key], field)
 
     def __setattr__(self, key, value):
-        if key in self.__dict__:
+        if key in self.__dict__ and key != 'value':
             super(NestedField, self).__setattr__(key, value)
         else:
             self.value[key] = value
 
     def __getattr__(self, key):
         try:
-            return self.value[key]
+            return super(NestedField, self).__getattribute__('value')[key]
         except KeyError:
             raise AttributeError(key)
 
@@ -106,6 +106,9 @@ class NestedField(BaseField):
     def parse(data, cls):
         obj = cls(data)
         return obj
+
+    def items(self):
+        return super(NestedField, self).__getattribute__('value').items()
 
 class ListField(BaseField):
     def __init__(self, value = None, *args, **kwargs):
@@ -181,3 +184,5 @@ class ListField(BaseField):
 
     def __reversed__(self):
         return reversed(self.value)
+
+from .encoder import BaseEncoder
