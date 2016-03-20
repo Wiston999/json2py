@@ -121,17 +121,21 @@ class ListTest(unittest.TestCase):
         self.assertEqual(self.testObj[0].value.value, 'aValue')
         self.assertEqual(self.testObj[1].value.value, 'anotherValue')
 
-        with self.assertRaises(ParseException):
-            ListObjTest(10)
+        self.assertRaises(ParseException, ListField.__init__, ListObjTest(), 10)
+        # with self.assertRaises(ParseException):
+        #     ListObjTest(10)
 
-        with self.assertRaises(ParseException):
-            ListObjTest(10.5)
+        self.assertRaises(ParseException, ListField.__init__, ListObjTest(), 10.5)
+        # with self.assertRaises(ParseException):
+        #     ListObjTest(10.5)
 
-        with self.assertRaises(ParseException):
-            ListObjTest("aString")
+        self.assertRaises(ParseException, ListField.__init__, ListObjTest(), "aString")
+        # with self.assertRaises(ParseException):
+        #     ListObjTest("aString")
 
-        with self.assertRaises(ParseException):
-            ListObjTest({})
+        self.assertRaises(ParseException, ListField.__init__, ListObjTest(), {})
+        # with self.assertRaises(ParseException):
+        #     ListObjTest({})
 
         self.assertRaises(IndexError, ListField.__getitem__, self.testObj, 2)
         # with self.assertRaises(IndexError):
