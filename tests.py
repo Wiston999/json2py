@@ -24,8 +24,9 @@ class TextTest(unittest.TestCase):
         self.assertEqual(TextField('''"aBc"''').value, '''"aBc"''')
         self.assertEqual(TextField("5").value, "5")
 
-        with self.assertRaises(ParseException):
-            TextField(5)
+        self.assertRaises(ParseException, TextField.__init__, TextField(), 5)
+        # with self.assertRaises(ParseException):
+        #     TextField(5)
 
     def test_encode(self):
         self.assertEqual(TextField("aBc").json_encode(), '"aBc"')
@@ -37,11 +38,13 @@ class IntegerTest(unittest.TestCase):
         self.assertEqual(IntegerField(10).value, 10)
         self.assertEqual(IntegerField(10L).value, 10)
 
-        with self.assertRaises(ParseException):
-            IntegerField('5')
+        self.assertRaises(ParseException, IntegerField.__init__, IntegerField(), '5')
+        # with self.assertRaises(ParseException):
+        #     IntegerField('5')
 
-        with self.assertRaises(ParseException):
-            IntegerField(10.0)
+        self.assertRaises(ParseException, IntegerField.__init__, IntegerField(), 10.0)
+        # with self.assertRaises(ParseException):
+        #     IntegerField(10.0)
 
     def test_encode(self):
         self.assertEqual(IntegerField(10).json_encode(), '10')
@@ -55,8 +58,9 @@ class FloatTest(unittest.TestCase):
         self.assertEqual(FloatField(10L).value, float(10))
         self.assertEqual(FloatField(10.5).value, 10.5)
 
-        with self.assertRaises(ParseException):
-            FloatField('10')
+        self.assertRaises(ParseException, FloatField.__init__, FloatField(), '10')
+        # with self.assertRaises(ParseException):
+        #     FloatField('10')
 
     def test_encode(self):
         self.assertEqual(FloatField(10.5).json_encode(), '10.5')
@@ -73,23 +77,29 @@ class NestedTest(unittest.TestCase):
         self.assertEqual(self.testObj.key.value, 1)    # clave field
         self.assertEqual(self.testObj.value.value, 'aValue')
 
-        with self.assertRaises(ParseException):
-            NestedField(10)
+        self.assertRaises(ParseException, NestedField.__init__, NestedField(), 10)
+        # with self.assertRaises(ParseException):
+        #     NestedField(10)
 
-        with self.assertRaises(ParseException):
-            NestedField(10.5)
+        self.assertRaises(ParseException, NestedField.__init__, NestedField(), 10.5)
+        # with self.assertRaises(ParseException):
+        #     NestedField(10.5)
 
-        with self.assertRaises(ParseException):
-            NestedField("aString")
+        self.assertRaises(ParseException, NestedField.__init__, NestedField(), "aString")
+        # with self.assertRaises(ParseException):
+        #     NestedField("aString")
 
-        with self.assertRaises(ParseException):
-            NestedField([])
+        self.assertRaises(ParseException, NestedField.__init__, NestedField(), [])
+        # with self.assertRaises(ParseException):
+        #     NestedField([])
 
-        with self.assertRaises(AttributeError):
-            self.testObj.unknownAttr
+        self.assertRaises(AttributeError, NestedField.__getattr__, self.testObj, 'unknownAttr')
+        # with self.assertRaises(AttributeError):
+        #     self.testObj.unknownAttr
 
-        with self.assertRaises(AttributeError):
-            NestedField({}).unknownAttr
+        self.assertRaises(AttributeError, NestedField.__getattr__, NestedField({}), 'unknownAttr')
+        # with self.assertRaises(AttributeError):
+        #     NestedField({}).unknownAttr
 
     def test_encode(self):
         self.assertEqual(NestedField({}).json_encode(), '{}')
@@ -123,11 +133,13 @@ class ListTest(unittest.TestCase):
         with self.assertRaises(ParseException):
             ListObjTest({})
 
-        with self.assertRaises(IndexError):
-            self.testObj[2]
+        self.assertRaises(IndexError, ListField.__getitem__, self.testObj, 2)
+        # with self.assertRaises(IndexError):
+        #     self.testObj[2]
 
-        with self.assertRaises(IndexError):
-            ListObjTest([])[0]
+        self.assertRaises(IndexError, ListField.__getitem__, ListObjTest([]), 0)
+        # with self.assertRaises(IndexError):
+        #     ListObjTest([])[0]
 
     def test_slice(self):
         self.assertEqual(len(self.testObj), 2)
