@@ -6,11 +6,20 @@
 Welcome to json2py's documentation!
 ===================================
 
+The goal of this module is to map plain ``json`` strings and ``json.loads`` structures into
+Python objects.
+
 Contents:
+---------
 
 .. toctree::
    :maxdepth: 2
 
+   models
+   exceptions
+   examples
+   Changelog
+   doc_coverage
 
 
 Indices and tables
