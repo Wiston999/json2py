@@ -118,6 +118,7 @@ class NestedField(BaseField):
     """
     Class representing a document field in JSON.
 
+
     :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
     :raise ParseException: If ``value`` is not a dict nor None
@@ -168,6 +169,12 @@ class NestedField(BaseField):
             return super(NestedField, self).__getattribute__(item)
         else:
             raise AttributeError(item)
+
+    def __getitem__(self, item):
+        return self.__getattribute__(item)
+
+    def __setitem__(self, key, value):
+        self.__setattr__(key, value)
 
     @staticmethod
     def parse(data, cls):

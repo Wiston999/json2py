@@ -25,11 +25,14 @@ The following example illustrates how this module works.
 
     myMappedList = ExampleList(list_var)
 
+    myMappedList[1].integer.value = 1234
+
     print myMappedList.json_encode(indent = 4)
 
 Should return something like:
 
 .. code-block:: json
+    :emphasize-lines: 8
 
     [
         {
@@ -38,7 +41,7 @@ Should return something like:
             "hello": "world"
         },
         {
-            "integer": 1000,
+            "integer": 1234,
             "floating": 10.5,
             "hello": "world"
         },
@@ -83,6 +86,10 @@ FloatField
 
 .. autoclass:: FloatField
     :members:
+
+.. todo::
+
+    Document how to access elements in :class:`.NestedField` with same name than Python's reserved keywords.
 
 NestedField
 -----------
