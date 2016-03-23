@@ -18,6 +18,38 @@ class NestedObjTest(NestedField):
 class ListObjTest(ListField):
     __model__ = NestedObjTest
 
+class NoneTest(unittest.TestCase):
+    def test_value(self):
+        self.assertEqual(TextField(None).value, None)
+        self.assertEqual(IntegerField(None).value, None)
+        self.assertEqual(FloatField(None).value, None)
+        self.assertEqual(NestedField(None).value, {})
+        self.assertEqual(len(ListObjTest(None)), 0)
+
+    def test_encode(self):
+        self.assertEqual(TextField(None).json_encode(), "null")
+        self.assertEqual(IntegerField(None).json_encode(), "null")
+        self.assertEqual(FloatField(None).json_encode(), "null")
+        self.assertEqual(NestedField(None).json_encode(), "{}")
+        self.assertEqual(ListObjTest(None).json_encode(), "[]")
+
+    def test_decode(self):
+        t = TextField(None)
+        t.json_decode("null")
+        self.assertEqual(t.value, None)
+        t = IntegerField(None)
+        t.json_decode("null")
+        self.assertEqual(t.value, None)
+        t = FloatField(None)
+        t.json_decode("null")
+        self.assertEqual(t.value, None)
+        t = NestedField(None)
+        t.json_decode("null")
+        self.assertEqual(t.value, {})
+        t = ListObjTest(None)
+        t.json_decode("null")
+        self.assertEqual(t.value, [])
+
 
 class TextTest(unittest.TestCase):
     def test_init(self):
@@ -31,6 +63,8 @@ class TextTest(unittest.TestCase):
     def test_encode(self):
         self.assertEqual(TextField("aBc").json_encode(), '"aBc"')
         self.assertEqual(TextField("5").json_encode(), '"5"')
+
+        self.assertEqual(TextField(None).json_encode(), 'null')
 
 
 class IntegerTest(unittest.TestCase):
