@@ -87,6 +87,13 @@ FloatField
 .. autoclass:: FloatField
     :members:
 
+BooleanField
+------------
+
+.. autoclass:: BooleanField
+    :members:
+
+
 .. todo::
 
     Document how to access elements in :class:`.NestedField` with same name than Python's reserved keywords.

@@ -51,11 +51,27 @@ class BaseField(object):
     def _dict_to_obj(self, d):
         self.__init__(d)
 
-    @staticmethod
-    def parse(data, cls):
-        obj = cls(data)
-        return obj
 
+class BooleanField(BaseField):
+    """
+    Class representing boolean field in JSON.
+
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg value: It is the raw data that is this object will represent once parsed.
+    :raise `ParseException`: If ``value`` is not boolean nor None
+    """
+    def __init__(self, *args, **kwargs):
+        super(BooleanField, self).__init__(**kwargs)
+        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+
+        if not isinstance(self.value, bool) and self.value is not None:
+            raise ParseException('BooleanField cannot parse non bool')
+
+    def __str__(self):
+        return str(self.value)
+
+    def __repr__(self):
+        return self.__str__()
 
 class TextField(BaseField):
     """
@@ -72,6 +88,11 @@ class TextField(BaseField):
         if not isinstance(self.value, (str, unicode)) and self.value is not None:
             raise ParseException('TextField cannot parse non string')
 
+    def __str__(self):
+        return str(self.value)  ## Use str() to avoid None's
+
+    def __repr__(self):
+        return self.__str__()
 
 class NumberField(BaseField):
     """
@@ -81,6 +102,11 @@ class NumberField(BaseField):
     def __init__(self, *args, **kwargs):
         super(NumberField, self).__init__(**kwargs)
 
+    def __str__(self):
+        return str(self.value)
+
+    def __repr__(self):
+        return self.__str__()
 
 class IntegerField(NumberField):
     """
@@ -224,11 +250,6 @@ class ListField(BaseField):
     def _dict_to_obj(self, d):
         self.value.append(self.__model__(d))
         return self.value[-1]
-
-    @staticmethod
-    def parse(data, cls):
-        obj = cls(data)
-        return obj
 
     def append(self, x):
         return self.value.append(x)

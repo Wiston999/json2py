@@ -6,9 +6,6 @@ Documentation coverage
 json2py.models
 --------------
 Classes:
- * BaseField -- missing methods:
-
-   - parse
  * ListField -- missing methods:
 
    - append

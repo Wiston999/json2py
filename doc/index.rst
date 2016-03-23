@@ -13,14 +13,12 @@ Contents:
 ---------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    models
    exceptions
    examples
    Changelog
-   doc_coverage
-
 
 Indices and tables
 ==================
