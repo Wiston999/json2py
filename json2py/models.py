@@ -15,15 +15,18 @@ class BaseField(object):
     """
     Base Class holding and defining common features for all the other subclasses.
 
+    :arg value: Value to be stored
     :arg name: Name of the field in source data.
+    :arg required: Whether raise LookupError when key is missing or not.
     :note: This class must be treated as abstract class and should not be reimplemented.
     """
-    def __init__(self, **kwargs):
+    def __init__(self, value = None, name = None, required = True):
         """
         :class:`.BaseField` constructor
         :param name: Name of the field in source data.
         """
-        self.name = kwargs.get('name', None)
+        self.name = name
+        self.required = required
 
     def json_encode(self, **kwargs):
         """
@@ -56,13 +59,14 @@ class BooleanField(BaseField):
     """
     Class representing boolean field in JSON.
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise `ParseException`: If ``value`` is not boolean nor None
     """
-    def __init__(self, *args, **kwargs):
-        super(BooleanField, self).__init__(**kwargs)
-        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+    def __init__(self, value = None, name = None, required = True):
+        super(BooleanField, self).__init__(value, name, required)
+        self.value = value
 
         if not isinstance(self.value, bool) and self.value is not None:
             raise ParseException('BooleanField cannot parse non bool')
@@ -77,13 +81,14 @@ class TextField(BaseField):
     """
     Class representing a string field in JSON.
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a string nor None
     """
-    def __init__(self, *args, **kwargs):
-        super(TextField, self).__init__(**kwargs)
-        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+    def __init__(self, value = None, name = None, required = True):
+        super(TextField, self).__init__(value, name, required)
+        self.value = value
 
         if not isinstance(self.value, (str, unicode)) and self.value is not None:
             raise ParseException('TextField cannot parse non string')
@@ -99,8 +104,8 @@ class NumberField(BaseField):
     Abstract class for representing JSON numbers.
     It really does nothing
     """
-    def __init__(self, *args, **kwargs):
-        super(NumberField, self).__init__(**kwargs)
+    def __init__(self, value = None, name = None, required = True):
+        super(NumberField, self).__init__(value, name, required)
 
     def __str__(self):
         return str(self.value)
@@ -112,13 +117,14 @@ class IntegerField(NumberField):
     """
     Class representing an integer field in JSON.
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a integer nor None
     """
-    def __init__(self, *args, **kwargs):
-        super(NumberField, self).__init__(**kwargs)
-        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+    def __init__(self, value = None, name = None, required = True):
+        super(NumberField, self).__init__(value, name, required)
+        self.value = value
 
         if not isinstance(self.value, (int, long)) and self.value is not None:
             raise ParseException('IntegerField cannot parse non integer')
@@ -128,13 +134,14 @@ class FloatField(NumberField):
     """
     Class representing a float field in JSON.
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a float nor None
     """
-    def __init__(self, *args, **kwargs):
-        super(NumberField, self).__init__(**kwargs)
-        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+    def __init__(self, value = None, name = None, required = True):
+        super(NumberField, self).__init__(value, name, required)
+        self.value = value
 
         if not isinstance(self.value, (float, int, long)) and self.value is not None:
             raise ParseException('FloatField cannot parse non float')
@@ -145,16 +152,18 @@ class NestedField(BaseField):
     Class representing a document field in JSON.
 
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a dict nor None
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, value = None, name = None, required = True):
         super(NestedField, self).__setattr__('value', {})
-        super(NestedField, self).__setattr__('name', kwargs.get('name', None))
-        super(NestedField, self).__init__(**kwargs)
+        super(NestedField, self).__setattr__('name', name)
+        super(NestedField, self).__setattr__('required', required)
+        super(NestedField, self).__init__(value, name, required)
 
-        data = args[0] if len(args) > 0 else kwargs.get('value')
+        data = value
         if not isinstance(data, dict) and data is not None:
             raise ParseException('NestedField cannot parse non dict')
 
@@ -172,9 +181,12 @@ class NestedField(BaseField):
                     reverseLookUp[fieldName] = fieldName
 
             for key, field in lookUpKeys.items():
-                if key not in data:
+                if key not in data and field.required:
                     raise LookupError('%s was not found on data dict' % key)
-                field = field.__class__(data[key], field.__class__)
+                elif not field.required:
+                    field = field.__class__(None)
+                else:
+                    field = field.__class__(data[key])
                 self.value[reverseLookUp[key]] = field
                 # setattr(self, reverseLookUp[key], field)
 
@@ -217,6 +229,7 @@ class ListField(BaseField):
 
     :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a list nor None
 
     :note: Hinting the structure of values of the list should be done using the meta variable :attr:`__model__`
@@ -228,8 +241,8 @@ class ListField(BaseField):
      lists must have the same structure.
 
     """
-    def __init__(self, value = None, *args, **kwargs):
-        super(ListField, self).__init__(**kwargs)
+    def __init__(self, value = None, name = None, required = True):
+        super(ListField, self).__init__(value, name, required)
 
         try:
             elementClass = self.__model__

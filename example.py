@@ -3,12 +3,15 @@ from json2py.models import *
 
 __author__ = 'Victor'
 
+
 class User(NestedField):
     login = TextField()
     id = IntegerField()
     url = TextField()
     user_type = TextField(name = 'type')
     site_admin = BooleanField()
+    name = TextField(required = False)
+
 
 class Repo(NestedField):
     id = IntegerField()
@@ -34,6 +37,7 @@ if response.status_code == 200:
     my_user = User(response.json())
     print my_user.login.value, "'s stats:"
     print "id:", my_user.id.value
+    print "full_name:", my_user.name.value
     print "login:", my_user.login.value
     print "url:", my_user.url.value
     print "type:", my_user.user_type.value
