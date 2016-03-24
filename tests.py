@@ -1,6 +1,5 @@
 import unittest
 import json
-from json2py.models import BaseField
 from json2py.models import TextField
 from json2py.models import IntegerField
 from json2py.models import FloatField
@@ -8,6 +7,9 @@ from json2py.models import NestedField
 from json2py.models import ListField
 from json2py.models import BooleanField
 from json2py.models import ParseException
+from json2py.models import DateField
+
+from datetime import datetime
 __author__ = 'Victor'
 
 
@@ -225,6 +227,30 @@ class ListTest(unittest.TestCase):
     def test_encode(self):
         self.assertEqual(ListObjTest([]).json_encode(), '[]')
         self.assertEqual(json.loads(self.testObj.json_encode()), json.loads('[{"id": 1234, "key": 1, "value": "aValue"},{"id": 4321, "key": 2, "value": "anotherValue"}]'))
+
+
+class DateTest(unittest.TestCase):
+    def test_init(self):
+        self.assertEqual(DateField("2000-01-02 03:04:05", formatting = "%Y-%m-%d %H:%M:%S").value, datetime(2000, 1, 2, 3, 4, 5))
+        self.assertEqual(DateField("2000-01-02T03:04:05Z").value, datetime(2000, 1, 2, 3, 4, 5))
+        self.assertEqual(DateField("2000-01-02 03:04:05", formatting = "auto").value, datetime(2000, 1, 2, 3, 4, 5))
+
+        self.assertEqual(DateField(1458854751, formatting = "timestamp").value, datetime(2016, 3, 24, 21, 25, 51))
+
+        self.assertRaises(
+            ParseException,
+            DateField.__init__,
+            DateField(),
+            [],
+            {"value": "anything", "formatting": "timestamp"}
+        )
+
+        self.assertRaises(
+            ParseException,
+            DateField.__init__,
+            DateField(),
+            12345
+        )
 
 if __name__ == '__main__':
     unittest.main()

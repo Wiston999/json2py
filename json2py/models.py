@@ -1,4 +1,6 @@
 import json
+from dateutil.parser import parse
+from datetime import datetime
 
 __author__ = 'Victor'
 
@@ -309,5 +311,45 @@ class ListField(BaseField):
 
     def __reversed__(self):
         return reversed(self.value)
+
+class DateField(BaseField):
+    """
+    Class used to parse and represent dates. It makes use of :mod:`datetime` and :mod:`dateutil`.
+
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg value: It is the raw data that is this object will represent once parsed.
+    :arg required: It has the same meaning as in :class:`.BaseField`
+    :arg formatting: Format used to represent date.
+    :raise ParseException: If ``value`` is not valid nor None
+
+    :note: Several format's can be in ``formatting``: **auto**: use :meth:`dateutil.parser.parse`,
+        **timestamp**: provide UNIX timestamp and use :meth:`datetime.datetime.utcfromtimestamp` and
+        **custom string**: use any format in compliance with :meth:`datetime.datetime.strptime` valid
+        formats.
+
+    """
+    def __init__(self, value = None, name = None, required = True, formatting = "%Y-%m-%dT%H:%M:%SZ"):
+        super(DateField, self).__init__(value, name, required)
+        self.value = None
+        self.formatting = formatting
+
+        field_type = 'str'
+        if formatting == 'timestamp':
+            field_type = 'int'
+
+        if field_type == 'str':
+            if not isinstance(value, (str, unicode)) and value is not None:
+                raise ParseException("DateField cannot parse non string with formatting specified '%s'" % self.formatting)
+        elif field_type == 'int':
+            if not isinstance(value, (int, long)) and value is not None:
+                raise ParseException("DateField cannot parse non integer with formatting specified '%s'" % self.formatting)
+
+        if value is not None:
+            if self.formatting == 'timestamp':
+                self.value = datetime.utcfromtimestamp(value)
+            elif self.formatting == 'auto':
+                self.value = parse(value)
+            else:
+                self.value = datetime.strptime(value, self.formatting)
 
 from .encoder import BaseEncoder
