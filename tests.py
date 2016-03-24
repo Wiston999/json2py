@@ -1,10 +1,12 @@
 import unittest
 import json
+from json2py.models import BaseField
 from json2py.models import TextField
 from json2py.models import IntegerField
 from json2py.models import FloatField
 from json2py.models import NestedField
 from json2py.models import ListField
+from json2py.models import BooleanField
 from json2py.models import ParseException
 __author__ = 'Victor'
 
@@ -18,6 +20,35 @@ class NestedObjTest(NestedField):
 class ListObjTest(ListField):
     __model__ = NestedObjTest
 
+
+class RequiredTest(unittest.TestCase):
+    def test_required(self):
+
+        class Req(NestedField):
+            req = IntegerField(required = True)
+
+        self.assertRaises(LookupError, Req.__init__, Req(), {})
+
+    def test_norequired(self):
+        class NoReq(NestedField):
+            no_req = IntegerField(required = False)
+
+        self.assertEqual(NoReq({}).no_req.value, None)
+
+
+class BooleanTest(unittest.TestCase):
+    def test_value(self):
+        self.assertEqual(BooleanField(None).value, None)
+        self.assertEqual(BooleanField(True).value, True)
+        self.assertEqual(BooleanField(False).value, False)
+
+        self.assertRaises(ParseException, BooleanField.__init__, BooleanField(), 5)
+
+    def test_encode(self):
+        self.assertEqual(BooleanField(True).json_encode(), 'true')
+        self.assertEqual(BooleanField(False).json_encode(), 'false')
+
+
 class NoneTest(unittest.TestCase):
     def test_value(self):
         self.assertEqual(TextField(None).value, None)
@@ -30,6 +61,7 @@ class NoneTest(unittest.TestCase):
         self.assertEqual(TextField(None).json_encode(), "null")
         self.assertEqual(IntegerField(None).json_encode(), "null")
         self.assertEqual(FloatField(None).json_encode(), "null")
+        self.assertEqual(BooleanField(None).json_encode(), "null")
         self.assertEqual(NestedField(None).json_encode(), "{}")
         self.assertEqual(ListObjTest(None).json_encode(), "[]")
 
@@ -41,6 +73,9 @@ class NoneTest(unittest.TestCase):
         t.json_decode("null")
         self.assertEqual(t.value, None)
         t = FloatField(None)
+        t.json_decode("null")
+        self.assertEqual(t.value, None)
+        t = BooleanField(None)
         t.json_decode("null")
         self.assertEqual(t.value, None)
         t = NestedField(None)
