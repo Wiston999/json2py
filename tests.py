@@ -252,5 +252,19 @@ class DateTest(unittest.TestCase):
             12345
         )
 
+    def test_encode(self):
+        self.assertEqual(DateField(None).json_encode(), 'null')
+        self.assertEqual(DateField(1458854751, formatting = "timestamp").json_encode(), '1458854751')
+
+        self.assertEqual(
+            DateField("2000-01-02 03:04:05", formatting = "auto").json_encode(),
+            '"2000-01-02T03:04:05Z"'
+        )
+
+        self.assertEqual(
+            DateField("2000-01-02 03:04:05", formatting = "%Y-%m-%d %H:%M:%S").json_encode(),
+            '"2000-01-02 03:04:05"'
+        )
+
 if __name__ == '__main__':
     unittest.main()

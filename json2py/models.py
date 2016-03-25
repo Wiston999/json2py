@@ -1,6 +1,7 @@
 import json
 from dateutil.parser import parse
 from datetime import datetime
+import calendar
 
 __author__ = 'Victor'
 
@@ -45,7 +46,7 @@ class BaseField(object):
         """
         Parses a JSON-string into this object. This method is intended to build
         the JSON to Object map, so it doesn't return any value, instead, the object
-        is built into self.
+        is built into itself.
 
         :param data: JSON-string passed to :py:func:`json.loads`
         :param kwargs: Parameters passed to :py:func:`json.loads`
@@ -351,5 +352,18 @@ class DateField(BaseField):
                 self.value = parse(value)
             else:
                 self.value = datetime.strptime(value, self.formatting)
+
+    def json_encode(self, **kwargs):
+        if self.value is None:
+            return json.dumps(self.value, **kwargs)
+        else:
+            if self.formatting == 'timestamp':
+                return json.dumps(calendar.timegm(self.value.timetuple()), **kwargs)
+            else:
+                formatting = self.formatting
+                if self.formatting == 'auto':
+                    formatting = "%Y-%m-%dT%H:%M:%SZ"
+
+                return json.dumps(self.value.strftime(formatting), **kwargs)
 
 from .encoder import BaseEncoder
