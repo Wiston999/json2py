@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name = 'json2py',
-    version = '0.1-beta',
+    version = '0.2',
     packages = ['json2py'],
     url = 'https://github.com/Wiston999/json2py',
     download_url = 'https://github.com/Wiston999/json2py/tarball/v0.1-beta',
