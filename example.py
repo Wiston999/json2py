@@ -10,7 +10,8 @@ class User(NestedField):
     url = TextField()
     user_type = TextField(name = 'type')
     site_admin = BooleanField()
-    name = TextField(required = False)
+    email = TextField(required = False)
+    full_name = TextField(name = 'name', required = False)
 
 
 class Repo(NestedField):
@@ -37,7 +38,8 @@ if response.status_code == 200:
     my_user = User(response.json())
     print my_user.login.value, "'s stats:"
     print "id:", my_user.id.value
-    print "full_name:", my_user.name.value
+    print "email:", my_user.email.value
+    print "full_name:", my_user.full_name.value
     print "login:", my_user.login.value
     print "url:", my_user.url.value
     print "type:", my_user.user_type.value

@@ -186,10 +186,10 @@ class NestedField(BaseField):
             for key, field in lookUpKeys.items():
                 if key not in data and field.required:
                     raise LookupError('%s was not found on data dict' % key)
-                elif not field.required:
-                    field = field.__class__(None)
-                else:
+                elif key in data:
                     field = field.__class__(data[key])
+                else:
+                    field = field.__class__(None)
                 self.value[reverseLookUp[key]] = field
                 # setattr(self, reverseLookUp[key], field)
 
