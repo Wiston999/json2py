@@ -5,7 +5,11 @@ from json2py.models import IntegerField
 from json2py.models import FloatField
 from json2py.models import NestedField
 from json2py.models import ListField
+from json2py.models import BooleanField
 from json2py.models import ParseException
+from json2py.models import DateField
+
+from datetime import datetime
 __author__ = 'Victor'
 
 
@@ -17,6 +21,35 @@ class NestedObjTest(NestedField):
 
 class ListObjTest(ListField):
     __model__ = NestedObjTest
+
+
+class RequiredTest(unittest.TestCase):
+    def test_required(self):
+
+        class Req(NestedField):
+            req = IntegerField(required = True)
+
+        self.assertRaises(LookupError, Req.__init__, Req(), {})
+
+    def test_norequired(self):
+        class NoReq(NestedField):
+            no_req = IntegerField(required = False)
+
+        self.assertEqual(NoReq({}).no_req.value, None)
+
+
+class BooleanTest(unittest.TestCase):
+    def test_value(self):
+        self.assertEqual(BooleanField(None).value, None)
+        self.assertEqual(BooleanField(True).value, True)
+        self.assertEqual(BooleanField(False).value, False)
+
+        self.assertRaises(ParseException, BooleanField.__init__, BooleanField(), 5)
+
+    def test_encode(self):
+        self.assertEqual(BooleanField(True).json_encode(), 'true')
+        self.assertEqual(BooleanField(False).json_encode(), 'false')
+
 
 class NoneTest(unittest.TestCase):
     def test_value(self):
@@ -30,6 +63,7 @@ class NoneTest(unittest.TestCase):
         self.assertEqual(TextField(None).json_encode(), "null")
         self.assertEqual(IntegerField(None).json_encode(), "null")
         self.assertEqual(FloatField(None).json_encode(), "null")
+        self.assertEqual(BooleanField(None).json_encode(), "null")
         self.assertEqual(NestedField(None).json_encode(), "{}")
         self.assertEqual(ListObjTest(None).json_encode(), "[]")
 
@@ -41,6 +75,9 @@ class NoneTest(unittest.TestCase):
         t.json_decode("null")
         self.assertEqual(t.value, None)
         t = FloatField(None)
+        t.json_decode("null")
+        self.assertEqual(t.value, None)
+        t = BooleanField(None)
         t.json_decode("null")
         self.assertEqual(t.value, None)
         t = NestedField(None)
@@ -190,6 +227,44 @@ class ListTest(unittest.TestCase):
     def test_encode(self):
         self.assertEqual(ListObjTest([]).json_encode(), '[]')
         self.assertEqual(json.loads(self.testObj.json_encode()), json.loads('[{"id": 1234, "key": 1, "value": "aValue"},{"id": 4321, "key": 2, "value": "anotherValue"}]'))
+
+
+class DateTest(unittest.TestCase):
+    def test_init(self):
+        self.assertEqual(DateField("2000-01-02 03:04:05", formatting = "%Y-%m-%d %H:%M:%S").value, datetime(2000, 1, 2, 3, 4, 5))
+        self.assertEqual(DateField("2000-01-02T03:04:05Z").value, datetime(2000, 1, 2, 3, 4, 5))
+        self.assertEqual(DateField("2000-01-02 03:04:05", formatting = "auto").value, datetime(2000, 1, 2, 3, 4, 5))
+
+        self.assertEqual(DateField(1458854751, formatting = "timestamp").value, datetime(2016, 3, 24, 21, 25, 51))
+
+        self.assertRaises(
+            ParseException,
+            DateField.__init__,
+            DateField(),
+            [],
+            {"value": "anything", "formatting": "timestamp"}
+        )
+
+        self.assertRaises(
+            ParseException,
+            DateField.__init__,
+            DateField(),
+            12345
+        )
+
+    def test_encode(self):
+        self.assertEqual(DateField(None).json_encode(), 'null')
+        self.assertEqual(DateField(1458854751, formatting = "timestamp").json_encode(), '1458854751')
+
+        self.assertEqual(
+            DateField("2000-01-02 03:04:05", formatting = "auto").json_encode(),
+            '"2000-01-02T03:04:05Z"'
+        )
+
+        self.assertEqual(
+            DateField("2000-01-02 03:04:05", formatting = "%Y-%m-%d %H:%M:%S").json_encode(),
+            '"2000-01-02 03:04:05"'
+        )
 
 if __name__ == '__main__':
     unittest.main()

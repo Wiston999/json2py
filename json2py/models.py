@@ -1,4 +1,7 @@
 import json
+from dateutil.parser import parse
+from datetime import datetime
+import calendar
 
 __author__ = 'Victor'
 
@@ -15,15 +18,18 @@ class BaseField(object):
     """
     Base Class holding and defining common features for all the other subclasses.
 
+    :arg value: Value to be stored
     :arg name: Name of the field in source data.
+    :arg required: Whether raise LookupError when key is missing or not.
     :note: This class must be treated as abstract class and should not be reimplemented.
     """
-    def __init__(self, **kwargs):
+    def __init__(self, value = None, name = None, required = True):
         """
         :class:`.BaseField` constructor
         :param name: Name of the field in source data.
         """
-        self.name = kwargs.get('name', None)
+        self.name = name
+        self.required = required
 
     def json_encode(self, **kwargs):
         """
@@ -40,7 +46,7 @@ class BaseField(object):
         """
         Parses a JSON-string into this object. This method is intended to build
         the JSON to Object map, so it doesn't return any value, instead, the object
-        is built into self.
+        is built into itself.
 
         :param data: JSON-string passed to :py:func:`json.loads`
         :param kwargs: Parameters passed to :py:func:`json.loads`
@@ -56,13 +62,14 @@ class BooleanField(BaseField):
     """
     Class representing boolean field in JSON.
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise `ParseException`: If ``value`` is not boolean nor None
     """
-    def __init__(self, *args, **kwargs):
-        super(BooleanField, self).__init__(**kwargs)
-        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+    def __init__(self, value = None, name = None, required = True):
+        super(BooleanField, self).__init__(value, name, required)
+        self.value = value
 
         if not isinstance(self.value, bool) and self.value is not None:
             raise ParseException('BooleanField cannot parse non bool')
@@ -77,13 +84,14 @@ class TextField(BaseField):
     """
     Class representing a string field in JSON.
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a string nor None
     """
-    def __init__(self, *args, **kwargs):
-        super(TextField, self).__init__(**kwargs)
-        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+    def __init__(self, value = None, name = None, required = True):
+        super(TextField, self).__init__(value, name, required)
+        self.value = value
 
         if not isinstance(self.value, (str, unicode)) and self.value is not None:
             raise ParseException('TextField cannot parse non string')
@@ -99,8 +107,8 @@ class NumberField(BaseField):
     Abstract class for representing JSON numbers.
     It really does nothing
     """
-    def __init__(self, *args, **kwargs):
-        super(NumberField, self).__init__(**kwargs)
+    def __init__(self, value = None, name = None, required = True):
+        super(NumberField, self).__init__(value, name, required)
 
     def __str__(self):
         return str(self.value)
@@ -112,13 +120,14 @@ class IntegerField(NumberField):
     """
     Class representing an integer field in JSON.
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a integer nor None
     """
-    def __init__(self, *args, **kwargs):
-        super(NumberField, self).__init__(**kwargs)
-        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+    def __init__(self, value = None, name = None, required = True):
+        super(NumberField, self).__init__(value, name, required)
+        self.value = value
 
         if not isinstance(self.value, (int, long)) and self.value is not None:
             raise ParseException('IntegerField cannot parse non integer')
@@ -128,13 +137,14 @@ class FloatField(NumberField):
     """
     Class representing a float field in JSON.
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a float nor None
     """
-    def __init__(self, *args, **kwargs):
-        super(NumberField, self).__init__(**kwargs)
-        self.value = args[0] if len(args) > 0 else kwargs.get('value')
+    def __init__(self, value = None, name = None, required = True):
+        super(NumberField, self).__init__(value, name, required)
+        self.value = value
 
         if not isinstance(self.value, (float, int, long)) and self.value is not None:
             raise ParseException('FloatField cannot parse non float')
@@ -145,16 +155,18 @@ class NestedField(BaseField):
     Class representing a document field in JSON.
 
 
-    :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a dict nor None
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, value = None, name = None, required = True):
         super(NestedField, self).__setattr__('value', {})
-        super(NestedField, self).__setattr__('name', kwargs.get('name', None))
-        super(NestedField, self).__init__(**kwargs)
+        super(NestedField, self).__setattr__('name', name)
+        super(NestedField, self).__setattr__('required', required)
+        super(NestedField, self).__init__(value, name, required)
 
-        data = args[0] if len(args) > 0 else kwargs.get('value')
+        data = value
         if not isinstance(data, dict) and data is not None:
             raise ParseException('NestedField cannot parse non dict')
 
@@ -172,9 +184,12 @@ class NestedField(BaseField):
                     reverseLookUp[fieldName] = fieldName
 
             for key, field in lookUpKeys.items():
-                if key not in data:
+                if key not in data and field.required:
                     raise LookupError('%s was not found on data dict' % key)
-                field = field.__class__(data[key], field.__class__)
+                elif not field.required:
+                    field = field.__class__(None)
+                else:
+                    field = field.__class__(data[key])
                 self.value[reverseLookUp[key]] = field
                 # setattr(self, reverseLookUp[key], field)
 
@@ -217,6 +232,7 @@ class ListField(BaseField):
 
     :arg name: It has the same meaning as in :class:`.BaseField`
     :arg value: It is the raw data that is this object will represent once parsed.
+    :arg required: It has the same meaning as in :class:`.BaseField`
     :raise ParseException: If ``value`` is not a list nor None
 
     :note: Hinting the structure of values of the list should be done using the meta variable :attr:`__model__`
@@ -228,8 +244,8 @@ class ListField(BaseField):
      lists must have the same structure.
 
     """
-    def __init__(self, value = None, *args, **kwargs):
-        super(ListField, self).__init__(**kwargs)
+    def __init__(self, value = None, name = None, required = True):
+        super(ListField, self).__init__(value, name, required)
 
         try:
             elementClass = self.__model__
@@ -296,5 +312,58 @@ class ListField(BaseField):
 
     def __reversed__(self):
         return reversed(self.value)
+
+class DateField(BaseField):
+    """
+    Class used to parse and represent dates. It makes use of :mod:`datetime` and :mod:`dateutil`.
+
+    :arg name: It has the same meaning as in :class:`.BaseField`
+    :arg value: It is the raw data that is this object will represent once parsed.
+    :arg required: It has the same meaning as in :class:`.BaseField`
+    :arg formatting: Format used to represent date.
+    :raise ParseException: If ``value`` is not valid nor None
+
+    :note: Several format's can be in ``formatting``: **auto**: use :meth:`dateutil.parser.parse`,
+        **timestamp**: provide UNIX timestamp and use :meth:`datetime.datetime.utcfromtimestamp` and
+        **custom string**: use any format in compliance with :meth:`datetime.datetime.strptime` valid
+        formats.
+
+    """
+    def __init__(self, value = None, name = None, required = True, formatting = "%Y-%m-%dT%H:%M:%SZ"):
+        super(DateField, self).__init__(value, name, required)
+        self.value = None
+        self.formatting = formatting
+
+        field_type = 'str'
+        if formatting == 'timestamp':
+            field_type = 'int'
+
+        if field_type == 'str':
+            if not isinstance(value, (str, unicode)) and value is not None:
+                raise ParseException("DateField cannot parse non string with formatting specified '%s'" % self.formatting)
+        elif field_type == 'int':
+            if not isinstance(value, (int, long)) and value is not None:
+                raise ParseException("DateField cannot parse non integer with formatting specified '%s'" % self.formatting)
+
+        if value is not None:
+            if self.formatting == 'timestamp':
+                self.value = datetime.utcfromtimestamp(value)
+            elif self.formatting == 'auto':
+                self.value = parse(value)
+            else:
+                self.value = datetime.strptime(value, self.formatting)
+
+    def json_encode(self, **kwargs):
+        if self.value is None:
+            return json.dumps(self.value, **kwargs)
+        else:
+            if self.formatting == 'timestamp':
+                return json.dumps(calendar.timegm(self.value.timetuple()), **kwargs)
+            else:
+                formatting = self.formatting
+                if self.formatting == 'auto':
+                    formatting = "%Y-%m-%dT%H:%M:%SZ"
+
+                return json.dumps(self.value.strftime(formatting), **kwargs)
 
 from .encoder import BaseEncoder
