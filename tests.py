@@ -39,6 +39,7 @@ class RequiredTest(unittest.TestCase):
 
         self.assertEqual(NoReq({"no_req": 10}).no_req.value, 10)
 
+
 class BooleanTest(unittest.TestCase):
     def test_value(self):
         self.assertEqual(BooleanField(None).value, None)
