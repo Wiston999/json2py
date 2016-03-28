@@ -192,8 +192,8 @@ class NestedField(BaseField):
                     field = field.__class__(data[key])
                 else:
                     field = field.__class__(None)
-
-                self.value[reverseLookUp[key]] = field
+                
+                super(NestedField, self).__getattribute__('value')[reverseLookUp[key]] = field
                 # setattr(self, reverseLookUp[key], field)
 
     def __setattr__(self, key, value):
