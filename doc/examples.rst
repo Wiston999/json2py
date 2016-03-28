@@ -186,7 +186,6 @@ Everything done! Let's try it
     :linenos:
     :caption: example3.py
     :name: example3.py
-    :emphasize-lines: 9
 
     import requests
     from models import RepoList
