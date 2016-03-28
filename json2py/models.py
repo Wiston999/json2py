@@ -156,11 +156,12 @@ class NestedField(BaseField):
     """
     Class representing a document field in JSON.
 
-
     :arg value: It is the raw data that is this object will represent once parsed.
     :arg name: It has the same meaning as in :class:`.BaseField`
     :arg required: It has the same meaning as in :class:`.BaseField`
-    :raise ParseException: If ``value`` is not a dict nor None
+    :raise `ParseException`: If ``value`` is not a dict nor None
+
+    :note: For use cases and examples refer to :doc:`examples`
     """
     def __init__(self, value = None, name = None, required = True):
         super(NestedField, self).__setattr__('value', {})
@@ -192,7 +193,7 @@ class NestedField(BaseField):
                     field = field.__class__(data[key])
                 else:
                     field = field.__class__(None)
-                
+
                 super(NestedField, self).__getattribute__('value')[reverseLookUp[key]] = field
                 # setattr(self, reverseLookUp[key], field)
 

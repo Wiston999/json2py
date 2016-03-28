@@ -31,8 +31,8 @@ We will map the *type* key into a field named *user_type* into our model.
 
 .. code-block:: python
     :linenos:
-    :caption: models.py
-    :name: models.py
+    :caption: models1.py
+    :name: models1.py
 
     from json2py.models import *
 
@@ -55,12 +55,12 @@ And we are all done! Now let's request the Github's user info endpoint.
 
     response = requests.get('https://api.github.com/users/wiston999')
     my_user = User(response.json())
-    print my_user.login.value, "'s stats:"
-    print "id:", my_user.id.value
-    print "login:", my_user.login.value
-    print "url:", my_user.url.value
-    print "type:", my_user.user_type.value
-    print "site_admin:", my_user.site_admin.value
+    print (my_user.login.value, "'s stats:")
+    print ("id:", my_user.id.value)
+    print ("login:", my_user.login.value)
+    print ("url:", my_user.url.value)
+    print ("type:", my_user.user_type.value)
+    print ("site_admin:", my_user.site_admin.value)
 
 Output after executing this code is
 
@@ -87,8 +87,8 @@ already modeled into the previous example, so, let's use a bit of code re-utiliz
 
 .. code-block:: python
     :linenos:
-    :caption: models.py
-    :name: models.py
+    :caption: models2.py
+    :name: models2.py
     :emphasize-lines: 8-
 
     class User(NestedField):
@@ -124,14 +124,14 @@ Let's try these models
 
     response = requests.get('https://api.github.com/repos/wiston999/json2py')
     this_repo = Repo(response.json())
-    print this_repo.name.value, "'s stats:"
-    print "id:", this_repo.id.value
-    print "full_name:", this_repo.full_name.value
-    print "owner:", this_repo.owner.login.value
-    print "private:", this_repo.is_private.value
-    print "description:", this_repo.description.value
-    print "language:", this_repo.language.value
-    print "default_branch:", this_repo.default_branch.value
+    print (this_repo.name.value, "'s stats:")
+    print ("id:", this_repo.id.value)
+    print ("full_name:", this_repo.full_name.value)
+    print ("owner:", this_repo.owner.login.value)
+    print ("private:", this_repo.is_private.value)
+    print ("description:", this_repo.description.value)
+    print ("language:", this_repo.language.value)
+    print ("default_branch:", this_repo.default_branch.value)
 
 Will output
 
@@ -155,8 +155,8 @@ a list of repositories, which we have already modeled, so, this should be as sim
 
 .. code-block:: python
     :linenos:
-    :caption: models.py
-    :name: models.py
+    :caption: models3.py
+    :name: models3.py
     :emphasize-lines: 19-
 
     class User(NestedField):
@@ -192,11 +192,11 @@ Everything done! Let's try it
 
     response = requests.get('https://api.github.com/users/wiston999/repos')
     user_repo_list = RepoList(response.json())
-    print "wiston999's repositories:"
+    print ("wiston999's repositories:")
     for repo in user_repo_list:
-        print "Repository name:", repo.name.value, "with id:", repo.id.value, "written in", repo.language.value
-        print "Repository Owner:", repo.owner.login.value
-        print '-'*70
+        print ("Repository name:", repo.name.value, "with id:", repo.id.value, "written in", repo.language.value)
+        print ("Repository Owner:", repo.owner.login.value)
+        print ('-'*70)
 
 And the output
 
@@ -227,3 +227,27 @@ And the output
     Repository name: repos-git with id: 20038280 written in Python
     Repository Owner: Wiston999
     ----------------------------------------------------------------------
+
+Using Python's reserved keywords
+--------------------------------
+
+When the need of model JSON or dict keys that are Python's keywords too (like from, in, for, etc.),
+one cannot do
+
+.. code-block:: python
+
+    class BadKeyword(NestedField):
+        from = IntegerField()
+
+
+as it raises :exc:`.SyntaxError`. A workaround to solve this is use the ``name`` parameter
+declared in :class:`json2py.models.BaseField`, so the previous can be solved with the following code
+
+.. code-block:: python
+
+    class BetterKeyword(NestedField):
+        from_ = IntegerField(name = 'from')
+
+
+Once ``name`` parameter is used, the name of variable can be anything distinct to Python's keywords and previous
+variable names.
