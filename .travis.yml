@@ -3,10 +3,14 @@ python:
   - "2.6"
   - "2.7"
 #  - "3.2"
-#  - "3.3"
-#  - "3.4"
-#  - "3.5"
+  - "3.3"
+  - "3.4"
+  - "3.5"
 
 install: "pip install -r requirements.txt"
 # command to run tests
 script: python tests.py
+
+addons:
+    code_climate:
+        repo_token: af84895870b053b268ad69c75b81bd4e3276f33327adc97243e58a64a30ceffa

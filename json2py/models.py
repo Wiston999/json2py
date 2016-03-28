@@ -1,3 +1,5 @@
+from past.builtins import basestring
+from builtins import int
 import json
 from dateutil.parser import parse
 from datetime import datetime
@@ -93,7 +95,7 @@ class TextField(BaseField):
         super(TextField, self).__init__(value, name, required)
         self.value = value
 
-        if not isinstance(self.value, (str, unicode)) and self.value is not None:
+        if not isinstance(self.value, basestring) and self.value is not None:
             raise ParseException('TextField cannot parse non string')
 
     def __str__(self):
@@ -129,7 +131,7 @@ class IntegerField(NumberField):
         super(NumberField, self).__init__(value, name, required)
         self.value = value
 
-        if not isinstance(self.value, (int, long)) and self.value is not None:
+        if not isinstance(self.value, int) and self.value is not None:
             raise ParseException('IntegerField cannot parse non integer')
 
 
@@ -146,7 +148,7 @@ class FloatField(NumberField):
         super(NumberField, self).__init__(value, name, required)
         self.value = value
 
-        if not isinstance(self.value, (float, int, long)) and self.value is not None:
+        if not isinstance(self.value, (float, int)) and self.value is not None:
             raise ParseException('FloatField cannot parse non float')
 
 
@@ -154,11 +156,12 @@ class NestedField(BaseField):
     """
     Class representing a document field in JSON.
 
-
     :arg value: It is the raw data that is this object will represent once parsed.
     :arg name: It has the same meaning as in :class:`.BaseField`
     :arg required: It has the same meaning as in :class:`.BaseField`
-    :raise ParseException: If ``value`` is not a dict nor None
+    :raise `ParseException`: If ``value`` is not a dict nor None
+
+    :note: For use cases and examples refer to :doc:`examples`
     """
     def __init__(self, value = None, name = None, required = True):
         super(NestedField, self).__setattr__('value', {})
@@ -190,7 +193,8 @@ class NestedField(BaseField):
                     field = field.__class__(data[key])
                 else:
                     field = field.__class__(None)
-                self.value[reverseLookUp[key]] = field
+
+                super(NestedField, self).__getattribute__('value')[reverseLookUp[key]] = field
                 # setattr(self, reverseLookUp[key], field)
 
     def __setattr__(self, key, value):
@@ -339,10 +343,10 @@ class DateField(BaseField):
             field_type = 'int'
 
         if field_type == 'str':
-            if not isinstance(value, (str, unicode)) and value is not None:
+            if not isinstance(value, basestring) and value is not None:
                 raise ParseException("DateField cannot parse non string with formatting specified '%s'" % self.formatting)
         elif field_type == 'int':
-            if not isinstance(value, (int, long)) and value is not None:
+            if not isinstance(value, int) and value is not None:
                 raise ParseException("DateField cannot parse non integer with formatting specified '%s'" % self.formatting)
 
         if value is not None:
