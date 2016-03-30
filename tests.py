@@ -7,6 +7,7 @@ from json2py.models import NestedField
 from json2py.models import ListField
 from json2py.models import BooleanField
 from json2py.models import ParseException
+from json2py.models import InvalidAttribute
 from json2py.models import DateField
 
 from datetime import datetime
@@ -16,11 +17,23 @@ __author__ = 'Victor'
 class NestedObjTest(NestedField):
     id = IntegerField()
     key = IntegerField(name = 'clave')
-    value = TextField()
+    valor = TextField(name = 'value')
 
 
 class ListObjTest(ListField):
     __model__ = NestedObjTest
+
+
+class ForbiddenNameTest(NestedField):
+    name = TextField()
+
+
+class ForbiddenValueTest(NestedField):
+    value = TextField()
+
+
+class ForbiddenRequiredTest(NestedField):
+    required = TextField()
 
 
 class RequiredTest(unittest.TestCase):
@@ -148,7 +161,7 @@ class NestedTest(unittest.TestCase):
     def test_init(self):
         self.assertEqual(self.testObj.id.value, 1234)
         self.assertEqual(self.testObj.key.value, 1)    # clave field
-        self.assertEqual(self.testObj.value.value, 'aValue')
+        self.assertEqual(self.testObj.valor.value, 'aValue')
 
         self.assertRaises(ParseException, NestedField.__init__, NestedField(), 10)
         # with self.assertRaises(ParseException):
@@ -176,7 +189,14 @@ class NestedTest(unittest.TestCase):
 
     def test_encode(self):
         self.assertEqual(NestedField({}).json_encode(), '{}')
-        self.assertEqual(json.loads(self.testObj.json_encode()), json.loads('{"id": 1234, "key": 1, "value": "aValue"}'))
+        self.assertEqual(json.loads(self.testObj.json_encode()), json.loads('{"id": 1234, "clave": 1, "value": "aValue"}'))
+
+    def test_forbidden(self):
+        ## Tricky test
+        self.assertRaises(InvalidAttribute, ForbiddenNameTest.__new__, ForbiddenNameTest)
+        self.assertRaises(InvalidAttribute, ForbiddenValueTest.__new__, ForbiddenValueTest)
+        self.assertRaises(InvalidAttribute, ForbiddenRequiredTest.__new__, ForbiddenRequiredTest)
+
 
 class ListTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -191,8 +211,8 @@ class ListTest(unittest.TestCase):
         self.assertEqual(self.testObj[1].id.value, 4321)
         self.assertEqual(self.testObj[0].key.value, 1)    # clave field
         self.assertEqual(self.testObj[1].key.value, 2)    # clave field
-        self.assertEqual(self.testObj[0].value.value, 'aValue')
-        self.assertEqual(self.testObj[1].value.value, 'anotherValue')
+        self.assertEqual(self.testObj[0].valor.value, 'aValue')
+        self.assertEqual(self.testObj[1].valor.value, 'anotherValue')
 
         self.assertRaises(ParseException, ListField.__init__, ListObjTest(), 10)
         # with self.assertRaises(ParseException):
@@ -224,11 +244,11 @@ class ListTest(unittest.TestCase):
         self.assertEqual(len(self.testObj[1:]), 1)
         self.assertEqual(self.testObj[-1].id.value, 4321)
         self.assertEqual(self.testObj[-1].key.value, 2)    # clave field
-        self.assertEqual(self.testObj[-1].value.value, 'anotherValue')
+        self.assertEqual(self.testObj[-1].valor.value, 'anotherValue')
 
     def test_encode(self):
         self.assertEqual(ListObjTest([]).json_encode(), '[]')
-        self.assertEqual(json.loads(self.testObj.json_encode()), json.loads('[{"id": 1234, "key": 1, "value": "aValue"},{"id": 4321, "key": 2, "value": "anotherValue"}]'))
+        self.assertEqual(json.loads(self.testObj.json_encode()), json.loads('[{"id": 1234, "clave": 1, "value": "aValue"},{"id": 4321, "clave": 2, "value": "anotherValue"}]'))
 
 
 class DateTest(unittest.TestCase):

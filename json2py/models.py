@@ -16,6 +16,13 @@ class ParseException(Exception):
     pass
 
 
+class InvalidAttribute(Exception):
+    """
+    Exception raised when invalid attribute is set on :class:`.NestedField`
+    """
+    pass
+
+
 class BaseField(object):
     """
     Base Class holding and defining common features for all the other subclasses.
@@ -82,6 +89,7 @@ class BooleanField(BaseField):
     def __repr__(self):
         return self.__str__()
 
+
 class TextField(BaseField):
     """
     Class representing a string field in JSON.
@@ -104,6 +112,7 @@ class TextField(BaseField):
     def __repr__(self):
         return self.__str__()
 
+
 class NumberField(BaseField):
     """
     Abstract class for representing JSON numbers.
@@ -117,6 +126,7 @@ class NumberField(BaseField):
 
     def __repr__(self):
         return self.__str__()
+
 
 class IntegerField(NumberField):
     """
@@ -160,9 +170,19 @@ class NestedField(BaseField):
     :arg name: It has the same meaning as in :class:`.BaseField`
     :arg required: It has the same meaning as in :class:`.BaseField`
     :raise `ParseException`: If ``value`` is not a dict nor None
+    :raise `InvalidAttribute`: If a reserved keyword is used as attribute
 
+    :note: Reserved keywords are: ``name``, ``value`` and ``required``
     :note: For use cases and examples refer to :doc:`examples`
     """
+    __forbiddenAttrs = ['name', 'value', 'required']
+
+    def __new__(cls, *args, **kwargs):
+        forbidden_intersection = set(dir(cls)).intersection(NestedField.__forbiddenAttrs)
+        if len(forbidden_intersection) > 0:
+            raise InvalidAttribute('%s cannot be used as attribute names, use name keyword for bypassing this limitation' %(', '.join(forbidden_intersection)))
+        return super(NestedField, cls).__new__(cls, *args, **kwargs)
+
     def __init__(self, value = None, name = None, required = True):
         super(NestedField, self).__setattr__('value', {})
         super(NestedField, self).__setattr__('name', name)
@@ -190,9 +210,9 @@ class NestedField(BaseField):
                 if key not in data and field.required:
                     raise LookupError('%s was not found on data dict' % key)
                 elif key in data:
-                    field = field.__class__(data[key])
+                    field = field.__class__(value = data[key], name = field.name, required = field.required)
                 else:
-                    field = field.__class__(None)
+                    field = field.__class__(value = None, name = field.name, required = field.required)
 
                 super(NestedField, self).__getattribute__('value')[reverseLookUp[key]] = field
                 # setattr(self, reverseLookUp[key], field)
@@ -228,6 +248,7 @@ class NestedField(BaseField):
 
     def items(self):
         return super(NestedField, self).__getattribute__('value').items()
+
 
 class ListField(BaseField):
     """
