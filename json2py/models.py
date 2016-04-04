@@ -181,7 +181,7 @@ class NestedField(BaseField):
         forbidden_intersection = set(dir(cls)).intersection(NestedField.__forbiddenAttrs)
         if len(forbidden_intersection) > 0:
             raise InvalidAttribute('%s cannot be used as attribute names, use name keyword for bypassing this limitation' %(', '.join(forbidden_intersection)))
-        return super(NestedField, cls).__new__(cls, *args, **kwargs)
+        return super(NestedField, cls).__new__(cls)
 
     def __init__(self, value = None, name = None, required = True):
         super(NestedField, self).__setattr__('value', {})
