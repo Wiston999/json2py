@@ -2,10 +2,10 @@ from distutils.core import setup
 
 setup(
     name = 'json2py',
-    version = '0.4',
+    version = '0.5',
     packages = ['json2py'],
     url = 'https://github.com/Wiston999/json2py',
-    download_url = 'https://github.com/Wiston999/json2py/tarball/v0.4',
+    download_url = 'https://github.com/Wiston999/json2py/tarball/v0.5',
     license = 'MIT',
     author = 'Victor Cabezas',
     author_email = 'wiston666@gmail.com',
@@ -22,7 +22,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5'
     ],
-    requires = [
+    install_requires = [
         'python-dateutil==2.4.2',
         'future==0.15.2'
     ]
