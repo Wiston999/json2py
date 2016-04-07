@@ -2,10 +2,10 @@ from distutils.core import setup
 
 setup(
     name = 'json2py',
-    version = '0.3',
+    version = '0.4',
     packages = ['json2py'],
     url = 'https://github.com/Wiston999/json2py',
-    download_url = 'https://github.com/Wiston999/json2py/tarball/v0.3',
+    download_url = 'https://github.com/Wiston999/json2py/tarball/v0.4',
     license = 'MIT',
     author = 'Victor Cabezas',
     author_email = 'wiston666@gmail.com',
