@@ -38,17 +38,17 @@ Should return something like:
         {
             "integer": 1000,
             "floating": 10.5,
-            "hello": "world"
+            "hi": "world"
         },
         {
             "integer": 1234,
             "floating": 10.5,
-            "hello": "world"
+            "hi": "world"
         },
         {
             "integer": 1000,
             "floating": 10.5,
-            "hello": "world"
+            "hi": "world"
         }
     ]
 
