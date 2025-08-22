@@ -24,6 +24,6 @@ setup(
     ],
     install_requires = [
         'python-dateutil==2.4.2',
-        'future==0.15.2'
+        'future==1.0.0'
     ]
 )
